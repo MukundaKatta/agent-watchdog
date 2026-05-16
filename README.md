@@ -1,5 +1,6 @@
 # agent-watchdog
 
+[![CI](https://github.com/MukundaKatta/agent-watchdog/actions/workflows/ci.yml/badge.svg)](https://github.com/MukundaKatta/agent-watchdog/actions/workflows/ci.yml)
 [![crates.io](https://img.shields.io/crates/v/agent-watchdog.svg)](https://crates.io/crates/agent-watchdog)
 [![docs.rs](https://docs.rs/agent-watchdog/badge.svg)](https://docs.rs/agent-watchdog)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
