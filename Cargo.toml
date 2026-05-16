@@ -1,0 +1,18 @@
+[package]
+name = "agent-watchdog"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+authors = ["MukundaKatta"]
+description = "Deadline, step, token, and cost watchdogs for LLM agent loops. Returns a structured Trip reason so callers can stop the loop with a clear cause."
+license = "MIT"
+repository = "https://github.com/MukundaKatta/agent-watchdog"
+homepage = "https://github.com/MukundaKatta/agent-watchdog"
+documentation = "https://docs.rs/agent-watchdog"
+readme = "README.md"
+keywords = ["llm", "agent", "timeout", "budget", "cancellation"]
+categories = ["api-bindings", "concurrency"]
+
+[dependencies]
+parking_lot = "0.12"
+thiserror = "2"
