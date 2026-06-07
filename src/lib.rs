@@ -98,17 +98,10 @@ impl Watchdog {
 
     /// Add a wall-clock timeout, starting now.
     pub fn with_timeout(self, dur: Duration) -> Self {
-        let inner = Arc::try_unwrap(self.inner).unwrap_or_else(|arc| {
-            // If shared, rebuild a fresh Inner. Builders are typically called
-            // before clones happen, so this is a defensive fallback.
-            Inner {
-                deadline: arc.deadline,
-                max_steps: arc.max_steps,
-                max_tokens: arc.max_tokens,
-                max_cost_usd: arc.max_cost_usd,
-                counters: Mutex::new(Counters::default()),
-            }
-        });
+        // If the Arc is shared, fall back to rebuilding a fresh Inner.
+        // Builders are typically called before clones happen, so this is a
+        // defensive fallback.
+        let inner = Arc::try_unwrap(self.inner).unwrap_or_else(rebuild_inner);
         Self {
             inner: Arc::new(Inner {
                 deadline: Some(Instant::now() + dur),

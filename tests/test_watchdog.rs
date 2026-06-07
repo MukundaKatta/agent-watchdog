@@ -112,6 +112,51 @@ fn no_timeout_returns_none_for_remaining() {
 }
 
 #[test]
+fn default_watchdog_has_no_caps() {
+    let w = Watchdog::default();
+    for _ in 0..1000 {
+        w.check().unwrap();
+        w.record_step();
+        w.record_tokens(10_000);
+        w.record_cost_usd(1.0);
+    }
+    let (steps, tokens, cost) = w.counters();
+    assert_eq!(steps, 1000);
+    assert_eq!(tokens, 10_000_000);
+    assert!((cost - 1000.0).abs() < 1e-6);
+}
+
+#[test]
+fn trip_display_messages() {
+    // The structured reason is part of the public API; its Display text is
+    // what callers log, so pin it down.
+    assert_eq!(Trip::Timeout.to_string(), "watchdog: timeout");
+    assert_eq!(Trip::MaxSteps.to_string(), "watchdog: max steps");
+    assert_eq!(Trip::MaxTokens.to_string(), "watchdog: max tokens");
+    assert_eq!(Trip::MaxCostUsd.to_string(), "watchdog: max cost USD");
+}
+
+#[test]
+fn priority_order_steps_before_tokens_before_cost() {
+    // With no timeout set, if steps, tokens, and cost caps could all trip,
+    // MaxSteps wins, then MaxTokens, then MaxCostUsd.
+    let w = Watchdog::new()
+        .with_max_steps(1)
+        .with_max_tokens(1)
+        .with_max_cost_usd(0.001);
+    w.record_step();
+    w.record_tokens(1);
+    w.record_cost_usd(0.001);
+    assert_eq!(w.check(), Err(Trip::MaxSteps));
+
+    // Without a step cap, MaxTokens wins over MaxCostUsd.
+    let w = Watchdog::new().with_max_tokens(1).with_max_cost_usd(0.001);
+    w.record_tokens(1);
+    w.record_cost_usd(0.001);
+    assert_eq!(w.check(), Err(Trip::MaxTokens));
+}
+
+#[test]
 fn loop_pattern_runs_to_completion() {
     // Simulate a 3-step agent loop with all caps generous enough to allow it.
     let w = Watchdog::new()
